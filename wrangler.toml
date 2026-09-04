@@ -1,0 +1,11 @@
+name = "sweet-home"
+main = "_worker.js"
+compatibility_date = "2026-09-04"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "SWEET_HOME_KV"
+id = "PUT_YOUR_KV_NAMESPACE_ID_HERE"
