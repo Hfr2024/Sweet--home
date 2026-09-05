@@ -2,3 +2,4 @@ _worker.js
 wrangler.toml
 README.txt
 SETUP-CLOUDFLARE.txt
+.git
