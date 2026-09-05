@@ -1,31 +1,9 @@
-SWEET HOME — النسخة الحديثة
-=============================
-
-هذه نسخة Static + Cloudflare Worker مع لوحة إدارة مخفية عن الزوار.
-
-المزايا:
-- اسم الموقع والعنوان يبدأان بـ Sweet Home.
-- يعمل على الهاتف والكمبيوتر وجميع المتصفحات الحديثة.
-- منتجات + أسعار + أقسام + فروع + أرقام واتساب.
-- لوحة إدارة ⚙️ لا تظهر بياناتها للزائر، وتحتاج كلمة مرور Cloudflare.
-- إضافة/حذف المنتجات والفروع وتعديل الأسعار والأقسام والصور.
-- رفع صور من الهاتف أو وضع رابط صورة.
-- تعديل اسم الموقع والعنوان والوصف والشعار وصورة الغلاف.
-- السلة والطلب عبر واتساب.
-- طرق الدفع: الدفع عند الاستلام، InstaPay، Vodafone Cash، Visa.
-- التوصيل داخل مدينة المنصورة فقط.
-
-النشر على Cloudflare (لجعل التعديلات تظهر لكل الزوار):
-1) أنشئ KV Namespace في Cloudflare باسم مثل SWEET_HOME_KV.
-2) ضع الـ Namespace ID مكان PUT_YOUR_KV_NAMESPACE_ID_HERE في wrangler.toml.
-3) اضبط Secret باسم ADMIN_PASSWORD من إعدادات Worker. لا تضع كلمة المرور داخل index.html أو script.js.
-4) انشر المجلد باستخدام Cloudflare Workers/ Wrangler. ملف _worker.js هو الذي يحفظ البيانات في KV.
-5) بعد النشر افتح رابط Cloudflare العام. عندها يرى الجميع نفس المنتجات والأسعار والفروع والصور التي يحفظها الأدمين.
-
-ملاحظة:
-إذا رفعت index.html فقط كاستضافة Static بدون Worker/KV، الموقع سيعمل للزوار، لكن تعديلات لوحة الإدارة ستكون محلية في نفس المتصفح ولن تتزامن مع بقية الزوار. لذلك النشر المرفق كـ Worker + KV هو المطلوب لتحقيق الإدارة المشتركة فعليًا.
-
-الأمان:
-- كلمة مرور الأدمين يتم قراءتها من Secret اسمه ADMIN_PASSWORD على Cloudflare.
-- API التعديل يرفض أي طلب لا يحمل كلمة المرور الصحيحة.
-- لا يوجد رابط مباشر ظاهر للزوار لصفحة إدارة منفصلة؛ زر الإدارة موجود فقط كواجهة دخول ويمكن إخفاؤه أكثر بتغيير CSS إذا رغبت.
+Sweet Home v2
+- Branches and WhatsApp numbers preloaded.
+- Branch opening hours: all branches 10:00 AM to 1:00 AM except Al-Teraa 10:00 AM to 2:00 AM.
+- Categories: حلويات شرقية، حلويات غربية، نواعم، شيكولاتة، رمضانيات، حلاوة المولد.
+- Products and prices remain editable from the admin panel.
+- Any new product/category can be added from admin.
+- Delivery can be ordered through any branch.
+- Admin URL: /?admin=1
+- Admin password: 1234

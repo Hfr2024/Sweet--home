@@ -1,47 +1,8 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Sweet Home - متجر الحلويات والمخبوزات">
-<meta name="theme-color" content="#4b251d">
-<title>Sweet Home | بيت الحلو</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="header"><div class="container nav">
-<a class="brand" href="#home"><img class="brand-logo" id="brandLogo" src="sweet-home-logo.jpg" alt="Sweet Home"><span>Sweet <b>Home</b></span></a>
-<nav><a href="#home">الرئيسية</a><a href="#products">المنتجات</a><a href="#branches">الفروع</a><a href="#order">اطلب الآن</a></nav>
-<div class="nav-actions"><button id="adminOpen" style="display:none" class="admin-btn" onclick="openAdmin()" aria-label="الإدارة">⚙️ <span>الإدارة</span></button><button class="cart-btn" onclick="openCart()">🛒 <span>السلة</span><i id="cartCount">0</i></button></div>
-</div></header>
-<main>
-<section id="home" class="hero"><img class="hero-logo" id="heroLogo" src="sweet-home-logo.jpg" alt="Sweet Home">
-<div class="container hero-grid"><div class="hero-copy">
-<span class="eyebrow" id="heroEyebrow">SWEET HOME • بيت الحلو ✨</span><h1 id="heroTitle">حلويات تُصنع<br><em>بحب</em> كل يوم.</h1>
-<p id="heroText">اختار من تشكيلتنا من الحلويات الشرقية والغربية والنواعم، وحدد فرعك واستلم طلبك بسهولة.</p>
-<div class="hero-actions"><a class="primary" href="#products">تصفح المنتجات</a><a class="secondary" href="#branches">فروعنا</a></div>
-<div class="trust"><span>🍰 جودة يومية</span><span>🥐 مخبوزات طازجة</span><span>💬 طلب مباشر واتساب</span></div>
-</div></div></section>
-<section class="categories container" id="categories"></section>
-<section id="products" class="section container"><div class="section-head"><div><span class="eyebrow">اختياراتنا</span><h2>أشهر المنتجات</h2></div><span id="productCount" class="muted"></span></div><div id="productsGrid" class="products"></div></section>
-<section id="branches" class="branches-section"><div class="container"><div class="section-head"><div><span class="eyebrow">قريبين منك</span><h2>فروع Sweet Home</h2></div><span class="muted">اختر الفرع الذي تريد إرسال الطلب إليه</span></div><div id="branchesGrid" class="branches"></div></div></section>
-<section id="order" class="order-section container"><div class="order-box"><div><span class="eyebrow">جاهز للطلب؟</span><h2>اختار الفرع، وإحنا نكمّل معاك على واتساب 💚</h2><p>أضف المنتجات للسلة ثم اختر الفرع. عند الضغط على إرسال الطلب سيتم فتح واتساب الفرع المختار برسالة الطلب كاملة.</p></div><button class="primary big" onclick="openCart()">🛒 مراجعة السلة</button></div></section>
-</main>
-<footer><div class="container footer"><div class="brand"><span class="brand-mark">SH</span><span>Sweet <b>Home</b></span></div><p>© <span id="year">2026</span> Sweet Home — كل الحقوق محفوظة</p></div></footer>
-
-<div id="overlay" class="overlay hidden" onclick="closeCart(event)"><aside class="cart" onclick="event.stopPropagation()"><div class="cart-head"><h2>سلة الطلب</h2><button onclick="closeCart()">✕</button></div><div id="cartItems"></div><div class="cart-summary"><div><span>الإجمالي</span><strong id="cartTotal">0 ج.م</strong></div></div>
-<label>اختر الفرع<select id="branchSelect"></select></label><label>اسم العميل<input id="customerName" placeholder="اكتب اسمك"></label><label>رقم الهاتف<input id="customerPhone" inputmode="tel" placeholder="01xxxxxxxxx"></label><label>العنوان<input id="customerAddress" placeholder="العنوان بالتفصيل"></label><label>طريقة الدفع<select id="paymentMethod"><option>الدفع عند الاستلام</option><option>InstaPay</option><option>Vodafone Cash</option><option>Visa</option></select></label><label>ملاحظات<textarea id="notes" placeholder="أي ملاحظات على الطلب..."></textarea></label>
-<button class="whatsapp" onclick="sendOrder()">🟢 إرسال الطلب على واتساب</button><p class="hint">التوصيل داخل مدينة المنصورة فقط.</p></aside></div>
-
-<div id="adminOverlay" class="overlay hidden" onclick="closeAdmin(event)"><aside class="admin-panel" onclick="event.stopPropagation()">
-<div class="cart-head"><div><span class="eyebrow">CONTROL CENTER</span><h2>إدارة Sweet Home</h2></div><button onclick="closeAdmin()">✕</button></div>
-<div id="adminLogin"><p class="muted">هذه المنطقة مخصصة للأدمين فقط.</p><label>كلمة مرور الأدمين<input id="adminPassword" type="password" autocomplete="current-password" placeholder="كلمة المرور"></label><button class="primary full" onclick="adminLogin()">دخول الإدارة</button><p id="loginMsg" class="error"></p></div>
-<div id="adminContent" class="hidden">
-<div class="admin-tabs"><button class="tab active" data-tab="productsTab">المنتجات</button><button class="tab" data-tab="branchesTab">الفروع</button><button class="tab" data-tab="siteTab">الموقع والصور</button></div>
-<section id="productsTab" class="tab-content"><div class="admin-toolbar"><h3>المنتجات والأسعار</h3><button class="secondary small" onclick="addProduct()">＋ إضافة منتج</button></div><div id="adminProducts"></div></section>
-<section id="branchesTab" class="tab-content hidden"><div class="admin-toolbar"><h3>الفروع وواتساب</h3><button class="secondary small" onclick="addBranch()">＋ إضافة فرع</button></div><div id="adminBranches"></div></section>
-<section id="siteTab" class="tab-content hidden"><h3>إعدادات الموقع</h3><label>اسم الموقع<input id="siteName"></label><label>العنوان الرئيسي<input id="siteTitle"></label><label>الوصف<textarea id="siteDescription"></textarea></label><div class="admin-grid"><label>رابط صورة الشعار<input id="logoUrl" placeholder="https://..."></label><label>رابط صورة الغلاف<input id="heroUrl" placeholder="https://..."></label><label>أو ارفع الشعار من الهاتف<input id="logoFile" type="file" accept="image/*" onchange="uploadImage(this,'logo')"></label><label>أو ارفع الغلاف من الهاتف<input id="heroFile" type="file" accept="image/*" onchange="uploadImage(this,'hero')"></label></div>
-<div class="admin-actions"><button class="primary" onclick="saveSiteSettings()">حفظ إعدادات الموقع</button><button class="secondary" onclick="resetAll()">استعادة البيانات الأصلية</button></div><div class="notice">مهم: عند تشغيل نسخة Cloudflare Worker المرفقة، الحفظ يكون مشتركًا بين الزوار. أما فتح index.html مباشرةً فيحفظ محليًا في نفس المتصفح فقط.</div></section>
-<div class="admin-actions"><button class="primary" onclick="saveAdminData()">💾 حفظ التعديلات</button><button class="secondary" onclick="adminLogout()">تسجيل خروج</button></div><p id="saveMsg" class="success"></p>
-</div></aside></div>
-<script src="script.js"></script>
-</body></html>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#7b3f25"><title>Sweet Home</title><link rel="stylesheet" href="style.css"></head><body>
+<header><a class="brand" href="#home"><b>SH</b><span id="brandName">Sweet Home</span></a><nav><a href="#home">الرئيسية</a><a href="#products">المنتجات</a><a href="#branches">الفروع</a><a href="#order">اطلب الآن</a></nav><button id="adminOpen" aria-label="الإدارة">⚙️</button></header>
+<main><section id="home" class="hero"><div><small>حلويات طازجة • المنصورة</small><h1 id="heroTitle">حلويات تُصنع<br><em>بحب</em> كل يوم.</h1><p id="heroDesc"></p><a class="btn" href="#products">تصفح المنتجات</a></div><div class="hero-art">🍰<i>🧁</i><i>🍩</i><i>🥮</i></div></section>
+<section id="products" class="section"><div class="head"><div><small>اختياراتنا</small><h2>أحلى حاجة عندنا</h2></div><div id="filters"></div></div><div id="productsGrid" class="grid"></div></section>
+<section id="order" class="section shade"><div class="order"><div><small>اطلب بسهولة</small><h2>طلبك على واتساب</h2><p>اختار المنتجات والفرع وبياناتك ثم أرسل الطلب.</p></div><form id="orderForm"><div class="cart"><b>السلة</b><div id="cartItems">السلة فارغة</div><strong id="cartTotal">الإجمالي: 0 جنيه</strong></div><input id="customerName" required placeholder="الاسم"><input id="customerPhone" required placeholder="رقم الموبايل"><input id="customerAddress" required placeholder="العنوان داخل المنصورة"><select id="branchSelect" required><option value="">اختار الفرع</option></select><select id="paymentSelect" required></select><button class="btn" type="submit">إرسال عبر واتساب</button><small>التوصيل متاح على أي فرع داخل مدينة المنصورة.</small></form></div></section>
+<section id="branches" class="section"><small>قريبين منك</small><h2>فروع Sweet Home</h2><div id="branchesGrid" class="branches"></div></section></main><footer><b>Sweet Home</b><span>حلويات تُصنع بحب ❤️</span></footer>
+<div id="adminModal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeAdmin()">×</button><div id="loginView"><small>منطقة الإدارة</small><h2>دخول الأدمين</h2><input id="adminPassword" type="password" placeholder="كلمة المرور"><button class="btn full" onclick="adminLogin()">دخول</button><p id="loginMsg"></p></div><div id="adminView" class="hidden"><small>لوحة التحكم</small><h2>إدارة Sweet Home</h2><div class="tabs"><button onclick="tab('site')">الموقع</button><button onclick="tab('products')">المنتجات</button><button onclick="tab('branches')">الفروع</button></div><div id="adminContent"></div><button class="btn" onclick="saveAdmin()">حفظ التعديلات</button><button onclick="adminLogout()">خروج</button><p id="saveMsg"></p></div></div></div>
+<script src="script.js"></script></body></html>
