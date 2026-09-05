@@ -18,7 +18,7 @@ const DEFAULT_DATA={
     {name:"الترعة",address:"",phone:"01022266663",wa:"201022266663",hours:"10:00 ص - 2:00 ص"},
     {name:"النخلة",address:"",phone:"01002999907",wa:"201002999907",hours:"10:00 ص - 1:00 ص"}
   ],
-  payments:["الدفع عند الاستلام","InstaPay","Vodafone Cash","Visa"],
+  paypayments:["الدفع عند الاستلام","InstaPay","Vodafone Cash","Visa"],
   delivery:"التوصيل متاح على أي فرع داخل مدينة المنصورة فقط."
 };
 
