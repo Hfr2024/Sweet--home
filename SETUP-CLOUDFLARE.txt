@@ -1,0 +1,1 @@
+النشر: ارفع الملفات إلى GitHub ثم Cloudflare Workers Builds، والأمر npx wrangler deploy. كلمة الإدارة 1234. الـKV مضمّن في wrangler.toml.
