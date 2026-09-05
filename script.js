@@ -1,43 +1,424 @@
-const DEFAULT_DATA={
-site:{name:"Sweet Home",title:"حلويات تُصنع<br><em>بحب</em> كل يوم.",description:"اختار من تشكيلتنا من الحلويات الشرقية والغربية والنواعم، وحدد فرعك واستلم طلبك بسهولة.",logo:"sweet-home-logo.jpg",hero:"hero-sweet-home.jpg"},
-products:[
-{id:1,name:"بسبوسة بالقشطة",cat:"شرقي",price:95,emoji:"🍮"},{id:2,name:"كنافة نابلسية",cat:"شرقي",price:120,emoji:"🥮"},{id:3,name:"تشيز كيك",cat:"غربي",price:135,emoji:"🍰"},{id:4,name:"مولتن شوكولاتة",cat:"غربي",price:110,emoji:"🍫"},{id:5,name:"كرواسون زبدة",cat:"نواعم",price:55,emoji:"🥐"},{id:6,name:"دونات شوكولاتة",cat:"نواعم",price:60,emoji:"🍩"},{id:7,name:"أم علي",cat:"شرقي",price:85,emoji:"🥣"},{id:8,name:"كب كيك",cat:"غربي",price:65,emoji:"🧁"}],
-branches:[
-{name:"فرع مدينة السلام",address:"مدينة السلام",phone:"01094004001",wa:"201094004001"},{name:"فرع قناة السويس",address:"قناة السويس",phone:"01090881475",wa:"201090881475"},{name:"فرع الترعة",address:"الترعة",phone:"01022266663",wa:"201022266663"},{name:"فرع النخلة",address:"النخلة",phone:"01002999907",wa:"201002999907"}]};
-let data=structuredClone(DEFAULT_DATA), cart=JSON.parse(localStorage.getItem("sweetHomeCart")||"[]"), activeCat="الكل", apiOK=false;
+const DEFAULT_DATA = {
+  site: {
+    name: "Sweet Home",
+    title: "حلويات تُصنع<br><em>بحب</em> كل يوم.",
+    description:
+      "اختار من تشكيلتنا من الحلويات الشرقية والغربية والنواعم، وحدد فرعك واستلم طلبك بسهولة.",
+    logo: "",
+    hero: ""
+  },
+  products: [],
+  branches: [],
+  payments: [
+    "الدفع عند الاستلام",
+    "InstaPay",
+    "Vodafone Cash",
+    "Visa"
+  ],
+  delivery: "التوصيل داخل مدينة المنصورة فقط"
+};
 
-async function loadData(){try{let r=await fetch("/api/data",{cache:"no-store"});if(r.ok){data=await r.json();apiOK=true;return}}catch(e){}const x=localStorage.getItem("sweetHomeData");if(x)try{data=JSON.parse(x)}catch(e){}}
-function money(n){return new Intl.NumberFormat("ar-EG").format(Number(n)||0)+" ج.م"}
-function render(){document.title=data.site.name+" | بيت الحلو";brandLogo.src=data.site.logo||"sweet-home-logo.jpg";heroLogo.src=data.site.logo||"sweet-home-logo.jpg";heroTitle.innerHTML=data.site.title;heroText.textContent=data.site.description;document.getElementById("year").textContent=new Date().getFullYear();renderCats();renderProducts();renderBranches();saveCart()}
-function renderCats(){let cats=["الكل",...new Set(data.products.map(p=>p.cat).filter(Boolean))];categories.innerHTML=cats.map(c=>`<button class="cat ${c===activeCat?"active":""}" onclick="setCat('${esc(c)}')">${c==="الكل"?"✨ ":""}${esc(c)}</button>`).join("")}
-function setCat(c){activeCat=c;renderCats();renderProducts()}
-function renderProducts(){let list=activeCat==="الكل"?data.products:data.products.filter(p=>p.cat===activeCat);productCount.textContent=list.length+" منتجات";productsGrid.innerHTML=list.length?list.map(p=>`<article class="product"><div class="product-art" ${p.image?`style="background-image:url('${escAttr(p.image)}')"`:""}>${p.image?"":p.emoji||"🍰"}</div><div class="product-body"><small>${esc(p.cat)}</small><h3>${esc(p.name)}</h3><div class="price-row"><span class="price">${money(p.price)}</span><button class="add" onclick="addToCart(${p.id})">+</button></div></div></article>`).join(""):`<div class="empty">لا توجد منتجات في هذا القسم.</div>`}
-function renderBranches(){branchesGrid.innerHTML=data.branches.map(b=>`<article class="branch"><h3>📍 ${esc(b.name)}</h3><p>${esc(b.address)}</p><p>☎️ ${esc(b.phone)}</p><div class="branch-actions"><a class="call" href="tel:${escAttr(b.phone)}">اتصال</a><a class="wa" target="_blank" rel="noopener" href="https://wa.me/${escAttr(b.wa)}">واتساب</a></div></article>`).join("");branchSelect.innerHTML=data.branches.map((b,i)=>`<option value="${i}">${esc(b.name)}</option>`).join("")}
-function addToCart(id){let x=cart.find(i=>i.id===id);if(x)x.qty++;else cart.push({id,qty:1});saveCart();openCart()}
-function saveCart(){localStorage.setItem("sweetHomeCart",JSON.stringify(cart));renderCart();cartCount.textContent=cart.reduce((s,i)=>s+i.qty,0)}
-function changeQty(id,d){let x=cart.find(i=>i.id===id);if(!x)return;x.qty+=d;if(x.qty<=0)cart=cart.filter(i=>i.id!==id);saveCart()}
-function renderCart(){if(!cart.length){cartItems.innerHTML='<div class="empty">السلة فارغة 🛒<br><small>أضف بعض الحلويات أولاً.</small></div>';cartTotal.textContent="0 ج.م";return}let total=0;cartItems.innerHTML=cart.map(i=>{let p=data.products.find(x=>x.id===i.id);if(!p)return"";total+=p.price*i.qty;return`<div class="cart-line"><span class="emoji">${p.emoji||"🍰"}</span><div><h4>${esc(p.name)}</h4><small>${money(p.price)} × ${i.qty}</small></div><div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${i.qty}</b><button onclick="changeQty(${p.id},1)">+</button></div></div>`}).join("");cartTotal.textContent=money(total)}
-function openCart(){overlay.classList.remove("hidden");renderCart()} function closeCart(e){if(!e||e.target.id==="overlay")overlay.classList.add("hidden")}
-function sendOrder(){if(!cart.length)return alert("السلة فارغة.");let b=data.branches[Number(branchSelect.value)],name=customerName.value.trim()||"عميل",phone=customerPhone.value.trim()||"غير مذكور",address=customerAddress.value.trim()||"غير مذكور",pay=paymentMethod.value,notesV=notes.value.trim()||"لا توجد";let total=0,lines=cart.map(i=>{let p=data.products.find(x=>x.id===i.id);if(!p)return"";total+=p.price*i.qty;return`• ${p.name} × ${i.qty} = ${money(p.price*i.qty)}`}).join("\n");let msg=`طلب جديد من موقع ${data.site.name}\n\nالعميل: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\nالفرع: ${b.name}\nطريقة الدفع: ${pay}\n\n${lines}\n\nالإجمالي: ${money(total)}\nملاحظات: ${notesV}\n\nأرجو تأكيد الطلب.`;window.open(`https://wa.me/${b.wa}?text=${encodeURIComponent(msg)}`,"_blank")}
-function openAdmin(){adminOverlay.classList.remove("hidden");adminPassword.focus()} function closeAdmin(e){if(!e||e.target.id==="adminOverlay")adminOverlay.classList.add("hidden")}
-async function adminLogin(){if(sessionStorage.getItem("sweetHomeAdmin")==="1"){showAdmin();return}let pass=adminPassword.value.trim();if(!pass){loginMsg.textContent="أدخل كلمة المرور.";return}
-try{let r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pass})});if(r.ok){sessionStorage.setItem("sweetHomeAdmin","1");showAdmin();return}loginMsg.textContent=r.status===401?"كلمة المرور غير صحيحة.":"تعذر تشغيل الإدارة. تأكد من إعداد Cloudflare Worker."}catch(e){loginMsg.textContent="الإدارة تحتاج نشر نسخة Cloudflare Worker المرفقة."}}
-function showAdmin(){adminLoginBox();renderAdmin()}
-function adminLoginBox(){document.getElementById("adminLogin").classList.add("hidden");adminContent.classList.remove("hidden")}
-function adminLogout(){sessionStorage.removeItem("sweetHomeAdmin");adminContent.classList.add("hidden");document.getElementById("adminLogin").classList.remove("hidden");adminPassword.value=""}
-function renderAdmin(){adminProducts.innerHTML=data.products.map((p,i)=>`<div class="edit-card"><div class="admin-grid"><label>الاسم<input data-p="${i}" data-k="name" value="${escAttr(p.name)}"></label><label>القسم<input data-p="${i}" data-k="cat" value="${escAttr(p.cat)}"></label><label>السعر<input type="number" min="0" data-p="${i}" data-k="price" value="${p.price}"></label><label>الإيموجي<input data-p="${i}" data-k="emoji" value="${escAttr(p.emoji||"🍰")}"></label><label class="wide">رابط صورة المنتج<input data-p="${i}" data-k="image" value="${escAttr(p.image||"")}" placeholder="https://..."></label></div><button class="danger" onclick="removeProduct(${i})">حذف المنتج</button></div>`).join("");
-adminBranches.innerHTML=data.branches.map((b,i)=>`<div class="edit-card"><div class="admin-grid"><label>اسم الفرع<input data-b="${i}" data-k="name" value="${escAttr(b.name)}"></label><label>العنوان<input data-b="${i}" data-k="address" value="${escAttr(b.address)}"></label><label>الهاتف<input data-b="${i}" data-k="phone" value="${escAttr(b.phone)}"></label><label>واتساب دولي<input data-b="${i}" data-k="wa" value="${escAttr(b.wa)}"></label></div><button class="danger" onclick="removeBranch(${i})">حذف الفرع</button></div>`).join("");
-siteName.value=data.site.name;siteTitle.value=data.site.title.replace(/<br>/g," ");siteDescription.value=data.site.description;logoUrl.value=data.site.logo||"";heroUrl.value=data.site.hero||""}
-function uploadImage(input,type,index){const file=input.files&&input.files[0];if(!file)return;if(file.size>2*1024*1024){alert("الصورة يجب ألا تتجاوز 2MB.");input.value="";return}const reader=new FileReader();reader.onload=()=>{if(type==="product")data.products[index].image=reader.result;else if(type==="logo")data.site.logo=reader.result;else if(type==="hero")data.site.hero=reader.result;renderAdmin();};reader.readAsDataURL(file)}
-function collectAdmin(){document.querySelectorAll("[data-p]").forEach(el=>data.products[+el.dataset.p][el.dataset.k]=el.dataset.k==="price"?Number(el.value):el.value);document.querySelectorAll("[data-b]").forEach(el=>data.branches[+el.dataset.b][el.dataset.k]=el.value)}
-function addProduct(){collectAdmin();data.products.push({id:Date.now(),name:"منتج جديد",cat:"غربي",price:0,emoji:"🍰"});renderAdmin()}
-function removeProduct(i){if(confirm("حذف هذا المنتج؟")){collectAdmin();data.products.splice(i,1);renderAdmin()}}
-function addBranch(){collectAdmin();data.branches.push({name:"فرع جديد",address:"",phone:"",wa:""});renderAdmin()}
-function removeBranch(i){if(confirm("حذف هذا الفرع؟")){collectAdmin();data.branches.splice(i,1);renderAdmin()}}
-async function saveAdminData(){collectAdmin();await persist();render();saveMsg.textContent=apiOK?"تم الحفظ للجميع عبر Cloudflare.":"تم الحفظ على هذا الجهاز فقط. لظهوره لكل الزوار فعّل Cloudflare Worker/KV المرفق.";setTimeout(()=>saveMsg.textContent="",5000)}
-async function saveSiteSettings(){collectAdmin();data.site.name=siteName.value.trim()||"Sweet Home";data.site.title=siteTitle.value.trim()||DEFAULT_DATA.site.title.replace(/<br>/g," ");data.site.description=siteDescription.value.trim();data.site.logo=logoUrl.value.trim()||"sweet-home-logo.jpg";data.site.hero=heroUrl.value.trim()||"hero-sweet-home.jpg";await persist();render();saveMsg.textContent=apiOK?"تم حفظ إعدادات الموقع للجميع.":"تم الحفظ محليًا فقط."}
-async function persist(){localStorage.setItem("sweetHomeData",JSON.stringify(data));try{let pass=adminPassword.value;let r=await fetch("/api/data",{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Password":pass},body:JSON.stringify(data)});if(r.ok)apiOK=true}catch(e){}}
-function resetAll(){if(confirm("استعادة كل المنتجات والفروع والإعدادات الأصلية؟")){data=structuredClone(DEFAULT_DATA);persist().then(()=>{render();renderAdmin()})}}
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));t.classList.add("active");document.getElementById(t.dataset.tab).classList.remove("hidden")});
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}function escAttr(s){return esc(s)}
-(async()=>{await loadData();render();if(new URLSearchParams(location.search).get("admin")==="1"){adminOpen.style.display="inline-flex";if(sessionStorage.getItem("sweetHomeAdmin")==="1")showAdmin()}})();
+let D = DEFAULT_DATA;
+let cart = [];
+let currentCat = "الكل";
+
+const $ = id => document.getElementById(id);
+
+async function loadData() {
+  try {
+    const r = await fetch("/api/data?x=" + Date.now(), {
+      cache: "no-store"
+    });
+
+    if (r.ok) {
+      D = await r.json();
+    }
+  } catch (e) {
+    D = DEFAULT_DATA;
+  }
+
+  render();
+}
+
+function money(n) {
+  return Number(n || 0).toLocaleString("ar-EG") + " جنيه";
+}
+
+function render() {
+  if ($("siteName")) $("siteName").textContent = D.site.name || "Sweet Home";
+
+  if ($("siteTitle"))
+    $("siteTitle").innerHTML =
+      D.site.title || DEFAULT_DATA.site.title;
+
+  if ($("siteDescription"))
+    $("siteDescription").textContent =
+      D.site.description || DEFAULT_DATA.site.description;
+
+  renderCats();
+  renderProducts();
+  renderBranches();
+  renderCart();
+}
+
+function renderCats() {
+  const cats = [
+    "الكل",
+    ...new Set(
+      (D.products || [])
+        .map(p => p.category)
+        .filter(Boolean)
+    )
+  ];
+
+  const box = $("categories");
+  if (!box) return;
+
+  box.innerHTML = cats
+    .map(
+      c =>
+        `<button class="${c === currentCat ? "active" : ""}" onclick="setCat('${String(c).replace(/'/g, "\\'")}')">${c}</button>`
+    )
+    .join("");
+}
+
+function setCat(cat) {
+  currentCat = cat;
+  renderCats();
+  renderProducts();
+}
+
+function renderProducts() {
+  const box = $("productsGrid");
+  if (!box) return;
+
+  const products = (D.products || []).filter(
+    p => currentCat === "الكل" || p.category === currentCat
+  );
+
+  if (!products.length) {
+    box.innerHTML =
+      '<div class="empty">لا توجد منتجات في هذا القسم حاليًا.</div>';
+    return;
+  }
+
+  box.innerHTML = products
+    .map(
+      p => `
+      <div class="product">
+        ${
+          p.image
+            ? `<img src="${p.image}" alt="${p.name || ""}">`
+            : `<div class="product-image">Sweet Home</div>`
+        }
+        <div class="product-info">
+          <h3>${p.name || ""}</h3>
+          <p>${p.description || ""}</p>
+          <strong>${money(p.price)}</strong>
+          <button class="btn" onclick="addToCart('${p.id}')">
+            أضف للسلة
+          </button>
+        </div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+function renderBranches() {
+  const grid = $("branchesGrid");
+
+  if (grid) {
+    grid.innerHTML = (D.branches || [])
+      .map(
+        b => `
+        <div class="branch">
+          <h3>${b.name || ""}</h3>
+          <p>📍 ${b.address || ""}</p>
+          <a href="tel:${b.phone || ""}">
+            📞 ${b.phone || ""}
+          </a>
+          <a
+            target="_blank"
+            rel="noopener"
+            href="https://wa.me/${normalizeWhatsApp(b.wa || b.whatsapp || b.phone)}"
+          >
+            واتساب الفرع
+          </a>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  const select = $("branchSelect");
+
+  if (select) {
+    select.innerHTML =
+      '<option value="">اختار الفرع</option>' +
+      (D.branches || [])
+        .map(
+          (b, i) =>
+            `<option value="${i}">${b.name || ""}</option>`
+        )
+        .join("");
+  }
+
+  const payment = $("paymentSelect");
+
+  if (payment) {
+    payment.innerHTML = (D.payments || [])
+      .map(p => `<option>${p}</option>`)
+      .join("");
+  }
+}
+
+function addToCart(id) {
+  const product = D.products.find(p => String(p.id) === String(id));
+
+  if (!product) return;
+
+  const item = cart.find(x => String(x.id) === String(id));
+
+  if (item) {
+    item.qty++;
+  } else {
+    cart.push({
+      id: product.id,
+      qty: 1
+    });
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function saveCart() {
+  try {
+    localStorage.setItem("sweet_home_cart", JSON.stringify(cart));
+  } catch (e) {}
+}
+
+function changeQty(id, amount) {
+  const item = cart.find(x => String(x.id) === String(id));
+
+  if (!item) return;
+
+  item.qty += amount;
+
+  if (item.qty <= 0) {
+    cart = cart.filter(x => String(x.id) !== String(id));
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const box = $("cartItems");
+  const count = $("cartCount");
+
+  if (count) {
+    count.textContent = cart.reduce(
+      (sum, x) => sum + x.qty,
+      0
+    );
+  }
+
+  if (!box) return;
+
+  if (!cart.length) {
+    box.innerHTML = "<p>السلة فارغة.</p>";
+    return;
+  }
+
+  box.innerHTML = cart
+    .map(item => {
+      const p = D.products.find(
+        x => String(x.id) === String(item.id)
+      );
+
+      if (!p) return "";
+
+      return `
+        <div class="cart-item">
+          <div>
+            <strong>${p.name}</strong>
+            <div>${money(p.price)}</div>
+          </div>
+
+          <div>
+            <button onclick="changeQty('${p.id}',-1)">−</button>
+            <span>${item.qty}</span>
+            <button onclick="changeQty('${p.id}',1)">+</button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function openCart() {
+  const cartBox = $("cartModal");
+
+  if (cartBox) {
+    cartBox.classList.add("open");
+  }
+}
+
+function closeCart() {
+  const cartBox = $("cartModal");
+
+  if (cartBox) {
+    cartBox.classList.remove("open");
+  }
+}
+
+/* إصلاح واتساب */
+function normalizeWhatsApp(number) {
+  let n = String(number || "").trim();
+
+  n = n.replace(/\D/g, "");
+
+  if (n.startsWith("00")) {
+    n = n.substring(2);
+  }
+
+  if (n.startsWith("20")) {
+    return n;
+  }
+
+  if (n.startsWith("0")) {
+    return "20" + n.substring(1);
+  }
+
+  return n;
+}
+
+function sendOrder() {
+  if (!cart.length) {
+    alert("أضف منتجًا أولاً");
+    return;
+  }
+
+  const branchSelect = $("branchSelect");
+  const customerName = $("customerName");
+  const customerPhone = $("customerPhone");
+  const customerAddress = $("customerAddress");
+  const paymentSelect = $("paymentSelect");
+
+  if (!branchSelect || !branchSelect.value) {
+    alert("اختر الفرع أولاً");
+    return;
+  }
+
+  const branch = D.branches[Number(branchSelect.value)];
+
+  if (!branch) {
+    alert("الفرع غير موجود");
+    return;
+  }
+
+  const wa = normalizeWhatsApp(
+    branch.wa || branch.whatsapp || branch.phone
+  );
+
+  if (!wa || wa.length < 11) {
+    alert("رقم واتساب الفرع غير صحيح. راجع رقم الفرع من لوحة الإدارة.");
+    return;
+  }
+
+  let total = 0;
+
+  const lines = cart
+    .map(item => {
+      const p = D.products.find(
+        x => String(x.id) === String(item.id)
+      );
+
+      if (!p) return "";
+
+      const value = Number(p.price || 0) * Number(item.qty || 0);
+
+      total += value;
+
+      return `• ${p.name} × ${item.qty} = ${value} جنيه`;
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  const message =
+`طلب جديد من Sweet Home
+
+الاسم: ${customerName ? customerName.value.trim() : ""}
+الموبايل: ${customerPhone ? customerPhone.value.trim() : ""}
+العنوان: ${customerAddress ? customerAddress.value.trim() : ""}
+الفرع: ${branch.name || ""}
+طريقة الدفع: ${paymentSelect ? paymentSelect.value : ""}
+
+المنتجات:
+${lines}
+
+الإجمالي: ${total} جنيه
+
+${D.delivery || ""}`;
+
+  const whatsappURL =
+    "https://wa.me/" +
+    wa +
+    "?text=" +
+    encodeURIComponent(message);
+
+  window.location.href = whatsappURL;
+}
+
+function openAdmin() {
+  window.location.href = "?admin=1";
+}
+
+async function adminLogin() {
+  const passwordInput = $("adminPassword");
+
+  if (!passwordInput) return;
+
+  const password = passwordInput.value;
+
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        password
+      })
+    });
+
+    if (response.ok) {
+      sessionStorage.setItem(
+        "sweet_home_admin",
+        password
+      );
+
+      window.location.href = "?admin=1";
+    } else {
+      alert("كلمة المرور غير صحيحة");
+    }
+  } catch (e) {
+    alert("تعذر الاتصال بالخادم");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    const saved = localStorage.getItem("sweet_home_cart");
+
+    if (saved) {
+      cart = JSON.parse(saved);
+    }
+  } catch (e) {
+    cart = [];
+  }
+
+  loadData();
+});
