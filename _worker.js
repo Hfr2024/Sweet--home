@@ -26,35 +26,21 @@ const DEFAULT_DATA = {
 
 const json = (data, status=200) => new Response(JSON.stringify(data), {
   status,
-  headers: {
-    "content-type": "application/json; charset=utf-8",
-    "cache-control": "no-store"
-  }
+  headers: {"content-type":"application/json; charset=utf-8","cache-control":"no-store"}
 });
 
 async function getData(env) {
   const raw = await env.SWEET_HOME_KV.get("site_data");
-
   if (!raw) {
-    await env.SWEET_HOME_KV.put(
-      "site_data",
-      JSON.stringify(DEFAULT_DATA)
-    );
+    await env.SWEET_HOME_KV.put("site_data", JSON.stringify(DEFAULT_DATA));
     return DEFAULT_DATA;
   }
-
-  try {
-    return JSON.parse(raw);
-  } catch (_) {
-    return DEFAULT_DATA;
-  }
+  try { return JSON.parse(raw); } catch (_) { return DEFAULT_DATA; }
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
-    const adminPassword = env.ADMIN_PASSWORD || "1234";
 
     if (url.pathname === "/api/data" && request.method === "GET") {
       return json(await getData(env));
@@ -63,64 +49,26 @@ export default {
     if (url.pathname === "/api/login" && request.method === "POST") {
       try {
         const body = await request.json();
-
-        if (body.password !== adminPassword) {
-          return json({ok:false}, 401);
-        }
-
+        if (!env.ADMIN_PASSWORD || body.password !== env.ADMIN_PASSWORD) return json({ok:false}, 401);
         return json({ok:true});
-      } catch (_) {
-        return json({ok:false}, 400);
-      }
+      } catch (_) { return json({ok:false}, 400); }
     }
 
     if (url.pathname === "/api/data" && request.method === "PUT") {
-      if (
-        request.headers.get("X-Admin-Password") !== adminPassword
-      ) {
-        return json({
-          ok:false,
-          error:"Unauthorized"
-        }, 401);
+      if (!env.ADMIN_PASSWORD || request.headers.get("X-Admin-Password") !== env.ADMIN_PASSWORD) {
+        return json({ok:false, error:"Unauthorized"}, 401);
       }
-
       try {
         const body = await request.json();
-
-        if (
-          !body ||
-          !body.site ||
-          !Array.isArray(body.products) ||
-          !Array.isArray(body.branches)
-        ) {
-          return json({
-            ok:false,
-            error:"Invalid data"
-          }, 400);
+        if (!body || !body.site || !Array.isArray(body.products) || !Array.isArray(body.branches)) {
+          return json({ok:false,error:"Invalid data"},400);
         }
-
+        // Basic size protection for accidental oversized uploads.
         const encoded = JSON.stringify(body);
-
-        if (encoded.length > 20000000) {
-          return json({
-            ok:false,
-            error:"Data too large"
-          }, 413);
-        }
-
-        await env.SWEET_HOME_KV.put(
-          "site_data",
-          encoded
-        );
-
+        if (encoded.length > 20000000) return json({ok:false,error:"Data too large"},413);
+        await env.SWEET_HOME_KV.put("site_data", encoded);
         return json({ok:true});
-
-      } catch (_) {
-        return json({
-          ok:false,
-          error:"Invalid JSON"
-        }, 400);
-      }
+      } catch (_) { return json({ok:false,error:"Invalid JSON"},400); }
     }
 
     return env.ASSETS.fetch(request);
