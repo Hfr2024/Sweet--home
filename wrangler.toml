@@ -1,11 +1,1 @@
-name = "sweet--home"
-main = "_worker.js"
-compatibility_date = "2026-09-04"
 
-[assets]
-directory = "."
-binding = "ASSETS"
-
-[[kv_namespaces]]
-binding = "SWEET_HOME_KV"
-id = "af8e74592ef8418c95868370d66c2c0f"
